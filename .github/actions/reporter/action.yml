@@ -1,0 +1,29 @@
+name: Reporter
+description: Configurar arquivo de report
+
+inputs:
+  secret_github:
+    description: "token github"
+    required: true
+
+  browser:
+    description: "Browser a ser executado"
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+      - name: Robot Reporter
+        uses: joonvena/robotframework-reporter-action@v2.4
+        if: always()
+        with:
+          gh_access_token: ${{ inputs.secret_github }}
+          report_path: logs
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4.6.1
+        if: always()
+        with:
+          name: ${{ inputs.browser }} Test report
+          path: logs
