@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Setup Environment
-        uses: ./.github/actions/setup-env
+        uses: ./.github/actions/setup-env/action.yml
         with:
           node_version: 20
           python_version: 3.12
