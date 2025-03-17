@@ -1,21 +1,21 @@
-name: 'Setup Environment'
-description: 'Setup Node.js, Python, and install dependencies'
+name: Setup Environment
+description: Setup Node.js, Python, and install dependencies
 
 inputs:
   node_version:
-    description: 'Node.js version'
+    description: "Node.js version"
     required: true
 
   python_version:
-    description: 'Python version'
+    description: "Python version"
     required: true
 
 runs:
-  using: 'composite'
+  using: composite
 
   steps:
-    # - name: Get code
-    #   uses: actions/checkout@v4
+    - name: Get code
+      uses: actions/checkout@v4
 
     - name: Install Node.js
       uses: actions/setup-node@v4
@@ -36,7 +36,7 @@ runs:
           ${{ runner.os }}-pip-
 
     - name: Install Deps
-      shell: bash
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+      shell: bash

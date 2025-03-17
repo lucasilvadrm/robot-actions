@@ -16,11 +16,8 @@ jobs:
         browser: [chromium, firefox]
 
     steps:
-      - name: Get code
-        uses: actions/checkout@v4
-
       - name: Setup Environment
-        uses: ./.github/actions/setup-env/action.yml
+        uses: ./.github/actions/setup-env
         with:
           node_version: 20
           python_version: 3.12
