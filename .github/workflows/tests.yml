@@ -49,6 +49,9 @@ jobs:
           node_version: 20
           python_version: 3.12
 
+      - name: Browser init
+        run: rfbrowser init
+
       - name: Run API Tests
         run: robot -d ./logs tests/api
 
