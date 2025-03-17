@@ -6,8 +6,8 @@ inputs:
     description: "token github"
     required: true
 
-  browser:
-    description: "Browser a ser executado"
+  report_test_name:
+    description: "report_test_name a ser executado"
     required: true
 
 runs:
@@ -25,5 +25,5 @@ runs:
         uses: actions/upload-artifact@v4.6.1
         if: always()
         with:
-          name: ${{ inputs.browser }} Test report
+          name: ${{ inputs.report_test_name }} Test report
           path: logs
