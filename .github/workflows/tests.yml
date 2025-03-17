@@ -16,6 +16,9 @@ jobs:
         browser: [chromium, firefox]
 
     steps:
+      - name: Get code
+        uses: actions/checkout@v4
+        
       - name: Setup Environment
         uses: ./.github/actions/setup-env
         with:
