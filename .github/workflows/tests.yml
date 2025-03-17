@@ -2,94 +2,62 @@ name: E2E Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
-  chrome:
-
+  e2e-tests:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Get code
-      uses: actions/checkout@v4
-
-    - name: Use Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-
-    - name: Setup Python
-      uses: actions/setup-python@v5.4.0
-      with: 
-        python-version: 3.12
-
-    - name: Install Deps
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Browser init
-      run: rfbrowser init
-
-    - name: Run E2E Tests
-      run: robot -d ./logs -v BROWSER:chromium tests
-
-    - name: Robot Reporter
-      uses: joonvena/robotframework-reporter-action@v2.4
-      if: always()
-      with: 
-        gh_access_token: ${{ secrets.GITHUB_TOKEN }}
-        report_path: logs
-
-    - name: Upload Report
-      uses: actions/upload-artifact@v4.6.1
-      if: always()
-      with:
-        name: Chromium Test report
-        path: logs
-
-  firefox:
-
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chrome, firefox]
 
     steps:
-    - name: Get code
-      uses: actions/checkout@v4
+      - name: Get code
+        uses: actions/checkout@v4
 
-    - name: Use Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    - name: Setup Python
-      uses: actions/setup-python@v5.4.0
-      with: 
-        python-version: 3.12
+      - name: Setup Python
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: 3.12
 
-    - name: Install Deps
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Cache Python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: Browser init
-      run: rfbrowser init
+      - name: Install Deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Run E2E Tests
-      run: robot -d ./logs -v BROWSER:firefox tests
+      - name: Browser init
+        run: rfbrowser init
 
-    - name: Robot Reporter
-      uses: joonvena/robotframework-reporter-action@v2.4
-      if: always()
-      with: 
-        gh_access_token: ${{ secrets.GITHUB_TOKEN }}
-        report_path: logs
+      - name: Run E2E Tests
+        run: robot -d ./logs -v BROWSER:${{ matrix.browser }} tests
 
-    - name: Upload Report
-      uses: actions/upload-artifact@v4.6.1
-      if: always()
-      with:
-        name: Firefox Test report
-        path: logs
+      - name: Robot Reporter
+        uses: joonvena/robotframework-reporter-action@v2.4
+        if: always()
+        with:
+          gh_access_token: ${{ secrets.GITHUB_TOKEN }}
+          report_path: logs
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4.6.1
+        if: always()
+        with:
+          name: ${{ matrix.browser }} Test report
+          path: logs
