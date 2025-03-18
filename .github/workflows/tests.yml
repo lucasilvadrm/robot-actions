@@ -11,35 +11,31 @@ jobs:
   health-check:
     runs-on: ubuntu-latest
 
-    container:
-      image: curlimages/curl:8.4.0
-
     steps:
-      - name: Checkout code
+      - name: Get code
         uses: actions/checkout@v4
 
-      - name: Health Check
-        run: |
-          check_url() {
-            response_code=$(curl -o /dev/null -w "%{http_code}" --location $1);
-            if [ $response_code -ne 200 ]; then
-              echo "Application at $1 is unavailable";
-              exit 1;
-            fi
-          }
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
+        with:
+          node_version: 20
+          python_version: 3.12
 
-          case $PROJECT in
-            web)
-              check_url https://krotonqa.service-now.com/krotonpda?ra=
-              ;;
-            all_apis)
-              check_url https://newidentity.krthomolog.com.br/swagger/index.html
-              ;;
-            *)
-              echo "Unsupported project for health-check: $PROJECT"
-              exit 1
-              ;;
-          esac
+      - name: Health Check Web Service
+        run: |
+          until curl --output /dev/null --silent --head --fail https://krotonqa.service-now.com/krotonpda?ra=; do
+            echo "Waiting for web service to be available..."
+            sleep 5
+          done
+
+
+      - name: Health Check API Service
+        run: |
+          until curl --output /dev/null --silent --head --fail https://newidentity.krthomolog.com.br/swagger/index.html; do
+            echo "Waiting for API service to be available..."
+            sleep 5
+
+          done
 
   web-tests:
     runs-on: ubuntu-latest
