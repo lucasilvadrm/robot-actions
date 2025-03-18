@@ -8,6 +8,39 @@ on:
   workflow_dispatch:
 
 jobs:
+  health-check:
+    runs-on: ubuntu-latest
+
+    container:
+      image: curlimages/curl:8.4.0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Health Check
+        run: |
+          check_url() {
+            response_code=$(curl -o /dev/null -w "%{http_code}" --location $1);
+            if [ $response_code -ne 200 ]; then
+              echo "Application at $1 is unavailable";
+              exit 1;
+            fi
+          }
+
+          case $PROJECT in
+            web)
+              check_url https://krotonqa.service-now.com/krotonpda?ra=
+              ;;
+            all_apis)
+              check_url https://newidentity.krthomolog.com.br/swagger/index.html
+              ;;
+            *)
+              echo "Unsupported project for health-check: $PROJECT"
+              exit 1
+              ;;
+          esac
+
   web-tests:
     runs-on: ubuntu-latest
 
