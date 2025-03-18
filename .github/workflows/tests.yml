@@ -68,6 +68,8 @@ jobs:
 
   api-tests:
     runs-on: ubuntu-latest
+    needs: health-check
+    
     steps:
       - name: Get code
         uses: actions/checkout@v4
