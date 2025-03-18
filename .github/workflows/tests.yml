@@ -8,16 +8,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  tests:
+  web-tests:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        test_type: [web, api]
         browser: [chromium, firefox]
-      fail-fast: false
 
     steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
       - name: Setup Environment
         uses: ./.github/actions/setup-env
         with:
@@ -25,20 +26,34 @@ jobs:
           python_version: 3.12
 
       - name: Browser init
-        if: ${{ matrix.test_type == 'web' }}
         run: rfbrowser init
 
       - name: Run E2E Tests
-        if: ${{ matrix.test_type == 'web' }}
         run: robot -d ./logs -v BROWSER:${{ matrix.browser }} tests/web
 
+      - name: Reporter
+        uses: ./.github/actions/reporter
+        with:
+          secret_github: ${{ secrets.GITHUB_TOKEN }}
+          report_test_name: ${{ matrix.browser }}
+
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
+        with:
+          node_version: 20
+          python_version: 3.12
+
       - name: Run API Tests
-        if: ${{ matrix.test_type == 'api' }}
         run: robot -d ./logs tests/api
 
       - name: Reporter
         uses: ./.github/actions/reporter
         with:
           secret_github: ${{ secrets.GITHUB_TOKEN }}
-
-          report_test_name: ${{ matrix.test_type == 'web' && matrix.browser || 'API' }}
+          report_test_name: API
